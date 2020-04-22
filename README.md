@@ -113,13 +113,9 @@
 
 ## 폴리시의 이동과 컨텍스트 매핑 (점선은 Pub/Sub, 실선은 Req/Resp)
 
-![image](https://user-images.githubusercontent.com/487999/79683641-5f938580-8266-11ea-9fdb-4e80ff6642fe.png)
+![image](https://user-images.githubusercontent.com/18453570/79933604-76ff8800-848b-11ea-8092-bd7510bf5d0b.png)
 
-## 완성된 1차 모형
-
-![image](https://user-images.githubusercontent.com/487999/79683646-63bfa300-8266-11ea-9bc5-c0b650507ac8.png)
-
-    - View Model 추가
+- View Model 추가
 
 ## 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
