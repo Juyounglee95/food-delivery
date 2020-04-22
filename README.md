@@ -117,14 +117,16 @@
 
 - View Model 추가
 
-## 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
+## 기능적/비기능적 요구사항을 커버하는지 검증
 
-![image](https://user-images.githubusercontent.com/487999/79684167-3ecd2f00-826a-11ea-806a-957362d197e3.png)
+![image](https://user-images.githubusercontent.com/18453570/79933961-5f74cf00-848c-11ea-9870-cbd05b6348c5.png)
 
-    - 고객이 메뉴를 선택하여 주문한다 (ok)
-    - 고객이 결제한다 (ok)
-    - 주문이 되면 주문 내역이 입점상점주인에게 전달된다 (ok)
-    - 상점주인이 확인하여 요리해서 배달 출발한다 (ok)
+-관리자는 도서를 등록한다.  ok
+-사용자는 도서를 예약한다.  ok
+-도서를 예약 시에는 포인트를 사용한다.  ok 
+-예약 취소 시에는 포인트가 반납된다.  ok
+-사용자는 도서를 반납한다.  ok
+
 
 ![image](https://user-images.githubusercontent.com/487999/79684170-47256a00-826a-11ea-9777-e16fafff519a.png)
     - 고객이 주문을 취소할 수 있다 (ok)
@@ -132,11 +134,6 @@
     - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok) 
     - 주문상태가 바뀔 때 마다 카톡으로 알림을 보낸다 (?)
 
-
-## 모델 수정
-
-![image](https://user-images.githubusercontent.com/487999/79684176-4e4c7800-826a-11ea-8deb-b7b053e5d7c6.png)
-    - 수정한 모델은 모든 요구사항을 커버함.
 
 ## 비기능 요구사항에 대한 검증
 
