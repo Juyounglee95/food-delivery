@@ -9,14 +9,15 @@
 1. 관리자는 도서를 등록한다.
 2. 사용자는 도서를 대여한다.
 3. 사용자는 도서가 대여 중인 경우, 도서를 예약한다.
-4. 도서를 대여시에는 포인트를 사용한다.
+4. 도서를 대여/예약 시에는 포인트를 사용한다.
+    4-1. 예약 취소 시에는 포인트가 반납된다.
 5. 사용자는 도서를 반납한다.
 
 ## 비기능적 요구사항
 1. 트랜잭션
-    1. 결제가 되지 않은 대여건은 아예 거래가 성립되지 않아야 한다.  Sync 호출 
+    1. 결제가 되지 않은 경우 대여할 수 없다.  Sync 호출 
 2. 장애격리
-    1. 도서관리 기능이 수행되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
+    1. 도서관리 기능이 수행되지 않더라도 대여/예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
     2. 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 잠시후에 결제하도록 유도한다  Circuit breaker, fallback
 3. 성능
     1. 사용자는 전체 도서 목록을 확인하여 전체 도서의 상태를 확인할 수 있어야한다. CQRS
@@ -85,29 +86,17 @@
 
 * 이벤트스토밍 결과:  http://msaez.io/#/storming/nZJ2QhwVc4NlVJPbtTkZ8x9jclF2/every/a77281d704710b0c2e6a823b6e6d973a/-M5AV2z--su_i4BfQfeF
 
-- AS-IS 조직
-  ![image](https://user-images.githubusercontent.com/487999/79684144-2a893200-826a-11ea-9a01-79927d3a0107.png)
-
-- TO-BE 조직
-  ![image](https://user-images.githubusercontent.com/487999/79684159-3543c700-826a-11ea-8d5f-a3fc0c4cad87.png)
-
 
 ## 이벤트 도출
-![image](https://user-images.githubusercontent.com/487999/79683604-47bc0180-8266-11ea-9212-7e88c9bf9911.png)
+![image](https://user-images.githubusercontent.com/18453570/79930892-9c3cc800-8484-11ea-9076-39259368f131.png)
 
-## 부적격 이벤트 탈락
-![image](https://user-images.githubusercontent.com/487999/79683612-4b4f8880-8266-11ea-9519-7e084524a462.png)
-
-    - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행함
-        - 주문시>메뉴카테고리선택됨, 주문시>메뉴검색됨 :  UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외
 
 ## 액터, 커맨드 부착하여 읽기 좋게
-![image](https://user-images.githubusercontent.com/487999/79683614-4ee30f80-8266-11ea-9a50-68cdff2dcc46.png)
+![image](https://user-images.githubusercontent.com/18453570/79931004-de660980-8484-11ea-9573-8cf3d8509e9e.png)
 
 ## 어그리게잇으로 묶기
-![image](https://user-images.githubusercontent.com/487999/79683618-52769680-8266-11ea-9c21-48d6812444ba.png)
+![image](https://user-images.githubusercontent.com/18453570/79931210-6ea44e80-8485-11ea-959b-2f500a9a7c1d.png)
 
-    - app의 Order, store 의 주문처리, 결제의 결제이력은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 
 ## 바운디드 컨텍스트로 묶기
 
