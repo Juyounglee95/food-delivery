@@ -129,33 +129,30 @@ https://github.com/Juyounglee95/view
 
 ![image](https://user-images.githubusercontent.com/18453570/79933961-5f74cf00-848c-11ea-9870-cbd05b6348c5.png)
 
+<기능적 요구사항 검증>
+
 -관리자는 도서를 등록한다.  ok
 -사용자는 도서를 예약한다.  ok
 -도서를 예약 시에는 포인트를 사용한다.  ok 
 -예약 취소 시에는 포인트가 반납된다.  ok
 -사용자는 도서를 반납한다.  ok
-
-
-![image](https://user-images.githubusercontent.com/487999/79684170-47256a00-826a-11ea-9777-e16fafff519a.png)
-    - 고객이 주문을 취소할 수 있다 (ok)
-    - 주문이 취소되면 배달이 취소된다 (ok)
-    - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok) 
-    - 주문상태가 바뀔 때 마다 카톡으로 알림을 보낸다 (?)
+- 사용자는 예약을 취소할 수 있다 (ok)
+- 예약이 취소되면 포인트가 반납되고, 도서의 상태가 예약 취소로 변경된다 (ok)
+- 사용자는 도서상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok)
+- 도서가 등록/예약/예약취소/반납 시, 도서의 상태가 변경되어 전체 도서 리스트에 반영된다. 사용자와 관리자 모두 이를 확인할 수 있다. ok
 
 
 ## 비기능 요구사항에 대한 검증
 
-![image](https://user-images.githubusercontent.com/487999/79684184-5c9a9400-826a-11ea-8d87-2ed1e44f4562.png)
-
-    - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
-        - 고객 주문시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문와료시 결제처리에 대해서는 Request-Response 방식 처리
-        - 결제 완료시 점주연결 및 배송처리:  App(front) 에서 Store 마이크로서비스로 주문요청이 전달되는 과정에 있어서 Store 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
-        - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+- 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
+        - 도서 예약시 결제처리:  예약완료시 포인트 결제처리에 대해서는 Request-Response 방식 처리
+        - 결제 완료시 도서 상태 변경:  Eventual Consistency 방식으로 트랜잭션 처리함.
+        - 나머지 모든 inter-microservice 트랜잭션: 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
 
 
-## 헥사고날 아키텍처 다이어그램 도출
+## 헥사고날 아키텍처 다이어그램 도출   //////수정예정
     
 ![image](https://user-images.githubusercontent.com/487999/79684772-eba9ab00-826e-11ea-9405-17e2bf39ec76.png)
 
@@ -167,42 +164,63 @@ https://github.com/Juyounglee95/view
 
 # 구현:
 
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현함. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+bookManagement/  bookRental/  gateway/  point/  view/
 
 ```
-cd app
+cd bookManagement
 mvn spring-boot:run
 
-cd pay
+cd bookRental
 mvn spring-boot:run 
 
-cd store
+cd gateway
 mvn spring-boot:run  
 
-cd customer
-python policy-handler.py 
+cd point
+mvn spring-boot:run
+
+cd view
+mvn spring-boot:run
 ```
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언. 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용함.
 
 ```
-package fooddelivery;
+package library;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="PointSystem_table")
+public class PointSystem {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String orderId;
-    private Double 금액;
+    private Long bookId;
+    private Long pointQty =(long)100;
+
+    @PostPersist
+    public void onPostPersist(){
+        PointUsed pointUsed = new PointUsed(this);
+        BeanUtils.copyProperties(this, pointUsed);
+        pointUsed.publish();
+
+
+    }
+
+    public Long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(Long bookId) {
+        this.bookId = bookId;
+    }
 
     public Long getId() {
         return id;
@@ -211,263 +229,162 @@ public class 결제이력 {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getOrderId() {
-        return orderId;
+    public Long getPointQty() {
+        return pointQty;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-    public Double get금액() {
-        return 금액;
+    public void setPointQty(Long pointQty) {
+        this.pointQty = pointQty;
     }
 
-    public void set금액(Double 금액) {
-        this.금액 = 금액;
-    }
+
+
 
 }
+
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package fooddelivery;
+package library;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface 결제이력Repository extends PagingAndSortingRepository<결제이력, Long>{
+public interface PointSystemRepository extends PagingAndSortingRepository<PointSystem, Long>{
+
+
 }
 ```
 - 적용 후 REST API 의 테스트
 ```
-# app 서비스의 주문처리
-http localhost:8081/orders item="통닭"
+# bookManagement 서비스의 도서 등록처리
+http POST http://52.231.116.117:8080/bookManageSystems bookName="JPA"
 
-# store 서비스의 배달처리
-http localhost:8083/주문처리s orderId=1
+# bookRental 서비스의 예약처리
+http POST http://52.231.116.117:8080/bookRentalSystems/returned/1
 
-# 주문 상태 확인
-http localhost:8081/orders/1
+# bookRental 서비스의 반납처리
+http POST http://52.231.116.117:8080/bookRentalSystems/reserve/1
 
-```
+# bookRental 서비스의 예약취소처리
+http POST http://52.231.116.117:8080/bookRentalSystems/reserveCanceled/1
 
-
-## 폴리글랏 퍼시스턴스
-
-앱프런트 (app) 는 서비스 특성상 많은 사용자의 유입과 상품 정보의 다양한 콘텐츠를 저장해야 하는 특징으로 인해 RDB 보다는 Document DB / NoSQL 계열의 데이터베이스인 Mongo DB 를 사용하기로 하였다. 이를 위해 order 의 선언에는 @Entity 가 아닌 @Document 로 마킹되었으며, 별다른 작업없이 기존의 Entity Pattern 과 Repository Pattern 적용과 데이터베이스 제품의 설정 (application.yml) 만으로 MongoDB 에 부착시켰다
-
-```
-# Order.java
-
-package fooddelivery;
-
-@Document
-public class Order {
-
-    private String id; // mongo db 적용시엔 id 는 고정값으로 key가 자동 발급되는 필드기 때문에 @Id 나 @GeneratedValue 를 주지 않아도 된다.
-    private String item;
-    private Integer 수량;
-
-}
-
-
-# 주문Repository.java
-package fooddelivery;
-
-public interface 주문Repository extends JpaRepository<Order, UUID>{
-}
-
-# application.yml
-
-  data:
-    mongodb:
-      host: mongodb.default.svc.cluster.local
-    database: mongo-example
-
-# 개발기에서는 etc/hosts 파일에 "mongodb.default.svc.cluster.local" 호스트명으로 접속할 수 있는 개발기를 붙여주어야 한다.
-    e.g. 
-    x.x.x.x mongodb.default.svc.cluster.local
+# 도서 상태 확인
+http://52.231.116.117:8080/bookLists
 
 ```
 
-## 폴리글랏 프로그래밍
+## 동기식 호출 과 비동기식 
 
-고객관리 서비스(customer)의 시나리오인 주문상태, 배달상태 변경에 따라 고객에게 카톡메시지 보내는 기능의 구현 파트는 해당 팀이 python 을 이용하여 구현하기로 하였다. 해당 파이썬 구현체는 각 이벤트를 수신하여 처리하는 Kafka consumer 로 구현되었고 코드는 다음과 같다:
-```
-from flask import Flask
-from redis import Redis, RedisError
-from kafka import KafkaConsumer
-import os
-import socket
-
-
-# To consume latest messages and auto-commit offsets
-consumer = KafkaConsumer('fooddelivery',
-                         group_id='',
-                         bootstrap_servers=['localhost:9092'])
-for message in consumer:
-    print ("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-                                          message.offset, message.key,
-                                          message.value))
-
-    # 카톡호출 API
-```
-
-파이선 애플리케이션을 컴파일하고 실행하기 위한 도커파일은 아래와 같다 (운영단계에서 할일인가? 아니다 여기 까지가 개발자가 할일이다. Immutable Image):
-```
-FROM python:2.7-slim
-WORKDIR /app
-ADD . /app
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
-ENV NAME World
-EXPOSE 8090
-CMD ["python", "policy-handler.py"]
-```
-
-
-## 동기식 호출 과 Fallback 처리
-
-분석단계에서의 조건 중 하나로 주문(app)->결제(pay) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 예약(bookRental)->결제(point) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-# (app) 결제이력Service.java
+# (app) pointSystemService.java
 
-package fooddelivery.external;
+@FeignClient(name="point", url="http://52.231.116.117:8080")
+public interface PointSystemService {
 
-@FeignClient(name="pay", url="http://localhost:8082")//, fallback = 결제이력ServiceFallback.class)
-public interface 결제이력Service {
-
-    @RequestMapping(method= RequestMethod.POST, path="/결제이력s")
-    public void 결제(@RequestBody 결제이력 pay);
+    @RequestMapping(method= RequestMethod.POST, path="/pointSystems", consumes = "application/json")
+    public void usePoints(@RequestBody PointSystem pointSystem);
 
 }
+
 ```
 
-- 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
+- 예약을 받은 직후(@PostPersist) 결제를 요청하도록 처리 -> BookRental의 생성은 BookManageSystem에서 도서를 등록한 직후 발생하기 때문에, Post요청으로 예약이 들어온 후 결제 요청하도록 처리함.
+
 ```
-# Order.java (Entity)
+# BookRentalSystemController.java (Entity)
 
-    @PostPersist
-    public void onPostPersist(){
-
-        fooddelivery.external.결제이력 pay = new fooddelivery.external.결제이력();
-        pay.setOrderId(getOrderId());
-        
-        Application.applicationContext.getBean(fooddelivery.external.결제이력Service.class)
-                .결제(pay);
+     @PostMapping("/bookRentalSystems/reserve/{id}")
+     public void bookReserve(@PathVariable(value="id")Long id){
+      PointSystem pointSystem = new PointSystem();
+      pointSystem.setBookId(id);
+      PointSystemService pointSystemService =  Application.applicationContext.
+              getBean(library.external.PointSystemService.class);
+      pointSystemService.usePoints(pointSystem);
+  }
     }
 ```
-
-- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
-
-
-```
-# 결제 (pay) 서비스를 잠시 내려놓음 (ctrl+c)
-
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Fail
-http localhost:8081/orders item=피자 storeId=2   #Fail
-
-#결제서비스 재기동
-cd 결제
-mvn spring-boot:run
-
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Success
-http localhost:8081/orders item=피자 storeId=2   #Success
-```
-
-- 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
-
-
-
-
-## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
-
-
-결제가 이루어진 후에 상점시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 상점 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
+결제가 이루어진 후에 도서대여시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 도서대여시스템의 처리를 위하여 도서 상태 업데이트는 블로킹 되지 않도록 처리한다.
  
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
- 
+
 ```
-package fooddelivery;
 
-@Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+#PointSystem.Java (Entity)
+{
+ @PostPersist
+    public void onPostPersist(){
+        PointUsed pointUsed = new PointUsed(this);
+        BeanUtils.copyProperties(this, pointUsed);
+        pointUsed.publish();
 
- ...
-    @PrePersist
-    public void onPrePersist(){
-        결제승인됨 결제승인됨 = new 결제승인됨();
-        BeanUtils.copyProperties(this, 결제승인됨);
-        결제승인됨.publish();
+
     }
-
 }
 ```
-- 상점 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+결제 완료 이벤트를 도서대여시스템의 리스너가 받아, 도서의 상태를 예약완료로 변경한다.
+
 
 ```
-package fooddelivery;
-
-...
-
-@Service
-public class PolicyHandler{
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
-
-        if(결제승인됨.isMe()){
-            System.out.println("##### listener 주문정보받음 : " + 결제승인됨.toJson());
-            // 주문 정보를 받았으니, 요리를 슬슬 시작해야지..
-            
+(BookRentalSystem) PolicyHandler.JAVA
+{
+    @StreamListener(KafkaProcessor.INPUT) //포인트 결제 완료시
+    public void wheneverPointUsed_ChangeStatus(@Payload PointUsed pointUsed){
+        try {
+            if (pointUsed.isMe()) {
+                System.out.println("##### point use completed : " + pointUsed.toJson());
+                BookRentalSystem bookRentalSystem = bookRentalSystemRepository.findById(pointUsed.getBookId()).get();
+                bookRentalSystem.setBookStatus("Reserved Complete");
+                bookRentalSystemRepository.save(bookRentalSystem);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
-
 }
-
-```
-실제 구현을 하자면, 카톡 등으로 점주는 노티를 받고, 요리를 마친후, 주문 상태를 UI에 입력할테니, 우선 주문정보를 DB에 받아놓은 후, 이후 처리는 해당 Aggregate 내에서 하면 되겠다.:
-  
-```
-  @Autowired 주문관리Repository 주문관리Repository;
-  
-  @StreamListener(KafkaProcessor.INPUT)
-  public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
-
-      if(결제승인됨.isMe()){
-          카톡전송(" 주문이 왔어요! : " + 결제승인됨.toString(), 주문.getStoreId());
-
-          주문관리 주문 = new 주문관리();
-          주문.setId(결제승인됨.getOrderId());
-          주문관리Repository.save(주문);
-      }
-  }
-
 ```
 
-상점 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 상점시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+
+도서상태가 변경되면, Reserved라는 이벤트를 발행한다.
+
+
 ```
-# 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
+BookRentalSystem.java (Entity)
 
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Success
-http localhost:8081/orders item=피자 storeId=2   #Success
+{
+   @PostUpdate
+    public void bookStatusUpdate(){
 
-#주문상태 확인
-http localhost:8080/orders     # 주문상태 안바뀜 확인
+        if(this.getBookStatus().equals("Returned")){
+            Returned returned = new Returned(this);
+            BeanUtils.copyProperties(this, returned);
+            returned.publish();
 
-#상점 서비스 기동
-cd 상점
-mvn spring-boot:run
+        }else if(this.getBookStatus().equals("Canceled")){
 
-#주문상태 확인
-http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 확인
+            ReservationCanceled reservationCanceled = new ReservationCanceled(this);
+            BeanUtils.copyProperties(this, reservationCanceled);
+            reservationCanceled.publish();
+        }else if(this.getBookStatus().equals("Reserved Complete")){
+            Reserved reserved = new Reserved(this);
+            BeanUtils.copyProperties(this, reserved);
+            reserved.publish();
+        }
+
+    }
+    
+}
 ```
+
+
+결과 : 포인트가 사용된 후에, 예약이 완료되는 것과 도서의 상태가 변경된 것을 확인 할 수 있다.
+
+![image](https://user-images.githubusercontent.com/18453570/80052154-f4db9600-8554-11ea-9dd6-3b38f9af596b.png)
+
 
 
 # 운영
@@ -475,7 +392,7 @@ http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 �
 ## CI/CD 설정
 
 
-각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 GCP를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 cloudbuild.yml 에 포함되었다.
+각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 azure를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 azure-pipeline.yml 에 포함되었다.
 
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
