@@ -6,11 +6,11 @@
 # 구현 Repository
 
 총 5개
-https://github.com/Juyounglee95/bookRental
-https://github.com/Juyounglee95/gateway
-https://github.com/Juyounglee95/bookManagement
-https://github.com/Juyounglee95/gateway
-https://github.com/Juyounglee95/view
+1. https://github.com/Juyounglee95/bookRental
+2. https://github.com/Juyounglee95/gateway
+3. https://github.com/Juyounglee95/bookManagement
+4. https://github.com/Juyounglee95/gateway
+5. https://github.com/Juyounglee95/view
 # 서비스 시나리오
 
 ## 기능적 요구사항
