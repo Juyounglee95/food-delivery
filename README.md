@@ -9,8 +9,10 @@
 1. https://github.com/Juyounglee95/bookRental
 2. https://github.com/Juyounglee95/gateway
 3. https://github.com/Juyounglee95/bookManagement
-4. https://github.com/Juyounglee95/gateway
+4. https://github.com/Juyounglee95/point
 5. https://github.com/Juyounglee95/view
+
+
 # 서비스 시나리오
 
 ## 기능적 요구사항
