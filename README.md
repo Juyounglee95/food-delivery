@@ -380,9 +380,10 @@ BookRentalSystem.java (Entity)
 ```
 
 
-결과 : 포인트가 사용된 후에, 예약이 완료되는 것과 도서의 상태가 변경된 것을 확인 할 수 있다.
+결과 : 포인트가 사용된 후에, 예약이 완료되는 것과 도서의 상태가 변경된 것을 BookListView확인 할 수 있다.
 
-![image](https://user-images.githubusercontent.com/18453570/80052154-f4db9600-8554-11ea-9dd6-3b38f9af596b.png)
+![image](https://user-images.githubusercontent.com/18453570/80061051-12b3f580-856b-11ea-989c-f4cf958613d5.png)
+
 
 
 
