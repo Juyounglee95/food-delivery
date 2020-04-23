@@ -3,6 +3,14 @@
 도서관의 책 대여 및 예약, 관리 시스템입니다.
 - 체크포인트 : https://workflowy.com/s/assessment-check-po/T5YrzcMewfo4J6LW
 
+# 구현 Repository
+
+총 5개
+https://github.com/Juyounglee95/bookRental
+https://github.com/Juyounglee95/gateway
+https://github.com/Juyounglee95/bookManagement
+https://github.com/Juyounglee95/gateway
+https://github.com/Juyounglee95/view
 # 서비스 시나리오
 
 ## 기능적 요구사항
