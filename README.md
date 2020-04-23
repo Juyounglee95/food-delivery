@@ -131,11 +131,11 @@ https://github.com/Juyounglee95/view
 
 <기능적 요구사항 검증>
 
--관리자는 도서를 등록한다.  ok
--사용자는 도서를 예약한다.  ok
--도서를 예약 시에는 포인트를 사용한다.  ok 
--예약 취소 시에는 포인트가 반납된다.  ok
--사용자는 도서를 반납한다.  ok
+- 관리자는 도서를 등록한다.  ok
+- 사용자는 도서를 예약한다.  ok
+- 도서를 예약 시에는 포인트를 사용한다.  ok 
+- 예약 취소 시에는 포인트가 반납된다.  ok
+- 사용자는 도서를 반납한다.  ok
 - 사용자는 예약을 취소할 수 있다 (ok)
 - 예약이 취소되면 포인트가 반납되고, 도서의 상태가 예약 취소로 변경된다 (ok)
 - 사용자는 도서상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok)
@@ -145,9 +145,9 @@ https://github.com/Juyounglee95/view
 ## 비기능 요구사항에 대한 검증
 
 - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
-        - 도서 예약시 결제처리:  예약완료시 포인트 결제처리에 대해서는 Request-Response 방식 처리
-        - 결제 완료시 도서 상태 변경:  Eventual Consistency 방식으로 트랜잭션 처리함.
-        - 나머지 모든 inter-microservice 트랜잭션: 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+    - 도서 예약시 결제처리:  예약완료시 포인트 결제처리에 대해서는 Request-Response 방식 처리
+    - 결제 완료시 도서 상태 변경:  Eventual Consistency 방식으로 트랜잭션 처리함.
+    - 나머지 모든 inter-microservice 트랜잭션: 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
 
@@ -156,9 +156,9 @@ https://github.com/Juyounglee95/view
     
 ![image](https://user-images.githubusercontent.com/18453570/80059618-5f95cd00-8567-11ea-9855-6fdc2e51bfd0.png)
 
-    - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
-    - 호출관계에서 PubSub 과 Req/Resp 를 구분함
-    - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
+- Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
+- 호출관계에서 PubSub 과 Req/Resp 를 구분함
+- 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
 
 
 # 구현:
